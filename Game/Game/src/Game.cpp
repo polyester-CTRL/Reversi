@@ -40,7 +40,8 @@ Circle smallStone[8][8];
 //const Font font(100); //メッセージを表示するために用意
 
 bool search = true;  //探索するかしないか決める
-bool put = false; //石が置かれた時だけtrueにする
+bool ai = true;      //コンピュータ対戦するかしないか
+bool put = false;    //石が置かれた時だけtrueにする
 
 
 int32 canPut[10][10] = { 0 };
@@ -165,8 +166,8 @@ void Game::update()
 
   //cellごとにスコア計算
   int32 score = 0;
-  for (int i = 5; i < 9; i++) {
-    for (int j = 5; j < 9; j++) {
+  for (int i = 1; i < 9; i++) {
+    for (int j = 1; j < 9; j++) {
       score = cellScore(i, j, 1);
       if (score >= 0) {
         FontAsset(U"cellNum")(score).draw(Origin.x + gridSize * (i - 1) + 8, Origin.y + gridSize * (j - 1) + 8, Palette::Black);
@@ -271,7 +272,8 @@ void Game::update()
 	}
 	//Print << U"max:" << maxPut;
 	int32 I, J;
-	if (SimpleGUI::Button(U"Random", Vec2(10, 150)) || turn % 2==0) {
+  SimpleGUI::CheckBox(ai, U"Computer", Vec2(10, 150));
+	if (ai == true && turn % 2==0) {
 		int32 m = Random() * 100, n = Random() * 100;
 		for (int i = 1; i < 9; i++) {
 			for (int j = 1; j < 9; j++) {
@@ -338,7 +340,7 @@ void Game::update()
 
 	int ans = 0;
 	//石を自動でひっくり返す
-	SimpleGUI::CheckBox(search, U"石を返す", Vec2(500, 40));
+	//SimpleGUI::CheckBox(search, U"石を返す", Vec2(500, 40));
 	if (search == true && put == true) { //チェックボックスtrueで石が置かれたら探索
 		ans = 0;
 		for (int k = 0; k < 8; k++) {
@@ -395,6 +397,7 @@ void Game::update()
 		innerCell[4][5] = deepCell[1][4][5] = 2;
 		innerCell[5][4] = deepCell[1][5][4] = 2;
 		innerCell[5][5] = deepCell[1][5][5] = 1;
+    pleaseSkip = false;
 	}
 
 	//スキップするボタン
@@ -568,7 +571,7 @@ int staticScore(int d) {
       for (int k = 0; k < 8; k++) {
         Coordinate c = { i, j, (d + 2) % 2 + 1, d + 1 };
         if (d > turn) {
-          canPut[i][j] += flip_stone(k, c, d - turn + 1); //ひっくり返さない
+          canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
         }
         else {
           canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
@@ -771,7 +774,9 @@ int cellScore(int x, int y, int z) {
   //スコア計算したらもとに戻す
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      deepCell[z + turn][i][j] = deepCell[turn][i][j];
+      for (int k = 0; k < z + 1; k++) {
+        deepCell[k + turn][i][j] = deepCell[turn][i][j];
+      }
     }
   }
   return score;

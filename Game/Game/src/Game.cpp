@@ -169,15 +169,13 @@ void Game::update()
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
       score = cellScore(i, j, 1);
+      FontAsset(U"cellNum")(score).draw(Origin.x + gridSize * (i - 1) + 8, Origin.y + gridSize * (j - 1) + 8, Palette::Black);
       if (score >= 0) {
-        FontAsset(U"cellNum")(score).draw(Origin.x + gridSize * (i - 1) + 8, Origin.y + gridSize * (j - 1) + 8, Palette::Black);
       }
     }
   }
 	//石を置ける場所を見つける
 	Coordinate c;
-	if (oncePerSecond % 3 == 0) {
-	}
 
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
@@ -244,7 +242,6 @@ void Game::update()
 				record[turn].turn = turn;
 				record[turn].status = innerCell[i + 1][j + 1]; //色を記録
 				put = true; //探索させる
-				oncePerSecond = 1;
 			}
 
 			if (innerCell[i + 1][j + 1] == 1) {
@@ -253,6 +250,7 @@ void Game::update()
 			else if (innerCell[i + 1][j + 1] == 2) {
 				//stone[i][j].draw(Palette::White);
 			}
+      //石を表示
 			if (deepCell[turn][i + 1][j + 1] == 1) {
 				stone[i][j].draw(Palette::Black);
 			}
@@ -273,7 +271,7 @@ void Game::update()
 	//Print << U"max:" << maxPut;
 	int32 I, J;
   SimpleGUI::CheckBox(ai, U"Computer", Vec2(10, 150));
-	if (ai == true && turn % 2==0) {
+	if (ai == true && turn % 2 == 0) {
 		int32 m = Random() * 100, n = Random() * 100;
 		for (int i = 1; i < 9; i++) {
 			for (int j = 1; j < 9; j++) {
@@ -305,7 +303,6 @@ void Game::update()
 					record[turn].turn = turn;
 					record[turn].status = innerCell[I][J]; //色を記録
 					put = true; //探索させる
-					oncePerSecond = 1;
 				}
 				if (put == true) {
 					break;
@@ -374,7 +371,7 @@ void Game::update()
 	font(white).draw(700, 150);
 
 	if (oncePerSecond % 60 == 0) {
-		Print << staticScore(0);
+		Print << staticScore(2);
 	}
 	put = false; //元に戻す
 
@@ -748,18 +745,21 @@ int staticScore(int d) {
 //cellごとのスコアを付ける
 //置けないところなら0
 int cellScore(int x, int y, int z) { 
-  int ans = deepCell[z + turn][x][y];
+  //int ans = deepCell[z + turn][x][y];
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      deepCell[turn + 1][i][j] = deepCell[turn][i][j];
+      for (int k = 1; k < z + 1; k++) {
+        deepCell[turn + z][i][j] = deepCell[turn][i][j];
+      }
     }
   }
 
   Coordinate c ;
   int32 score = 0;
   //着手してみてスコアを付ける
-  if (deepCell[z + turn][x][y] == 0 && canPut[x][y] > 0) {
-    deepCell[z + turn][x][y] = turn % 2 + 1; //1なら黒、2なら白
+  if (deepCell[z + turn][x][y] == 0) {
+    
+    deepCell[z + turn][x][y] = (turn + 1) % 2 + 1; //1なら黒、2なら白
     c.x = x; //置いた場所を記録
     c.y = y;
     c.turn = turn + z;
@@ -767,17 +767,19 @@ int cellScore(int x, int y, int z) {
     //put = true; //探索させる
 
     for (int k = 0; k < 8; k++) {
-      ans += flip_stone(k, c, z); //ひっくり返す
+      int ans = flip_stone(k, c, z); //ひっくり返す
     }
     score = staticScore(z);
   }
+  
   //スコア計算したらもとに戻す
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      for (int k = 0; k < z + 1; k++) {
+      for (int k = 1; k < z + 1; k++) {
         deepCell[k + turn][i][j] = deepCell[turn][i][j];
       }
     }
   }
+  
   return score;
 }

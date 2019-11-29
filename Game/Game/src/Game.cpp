@@ -155,7 +155,8 @@ void Game::update()
     getData().tmpTime = (int32)Scene::Time();
 	}
 	//盤面
-	Scene::SetBackground(Palette::Green);
+	Scene::SetBackground(ColorF(0.2,0.8,0.3));
+  //Scene::SetBackground(ColorF(0.2, 0.8, 0.4));
 	rectFrame.drawFrame(0, 3, Palette::Black);
 	//LineX.draw(3, Palette::Black);
 	//LineY.draw(3, Palette::Black);
@@ -164,18 +165,44 @@ void Game::update()
 		Line(Origin.x, Origin.y + gridSize * i, Origin.x + gridSize * 8, Origin.y + gridSize * i).draw(3, Palette::Black);
 	}
 
+
+  //石を置ける場所を見つける
+  Coordinate c;
+
   //cellごとにスコア計算
-  int32 score = 0;
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      ///////////元の部分
+      c = { i + 1, j + 1, (turn + 1) % 2 + 1, turn }; //探索関数に送る情報
+      for (int k = 0; k < 8; k++) { //探索方向を決める
+
+        canPut[i + 1][j + 1] += flip_stone(k, c, 0); //ひっくり返さない
+        if (innerCell[i + 1][j + 1] != 0) {
+          canPut[i + 1][j + 1] = 0; //置ける場所でなかったら0に戻す
+        }
+      }
+      /*
+      if (canPut[i + 1][j + 1] > 0) { //ひっくり返り得る数を表示
+        font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i + 5, Origin.y + gridSize * j + 5, Palette::White);
+        smallStone[i][j].draw(Palette::Darkgoldenrod);
+      }
+      */
+      //////////終わり
+    }
+  }
+  int32 score[10][10] = { 0 };
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      score = cellScore(i, j, 1);
-      FontAsset(U"cellNum")(score).draw(Origin.x + gridSize * (i - 1) + 8, Origin.y + gridSize * (j - 1) + 8, Palette::Black);
-      if (score >= 0) {
+      if (canPut[i][j] > 0) {
+        score[i][j] = cellScore(i, j, 1);
+        //FontAsset(U"cellNum")(score[i][j]).draw(Origin.x + gridSize * (i - 1) + 8, Origin.y + gridSize * (j - 1) + 8, Palette::Black);
+      }
+      else {
+        score[i][j] = 0;
       }
     }
   }
-	//石を置ける場所を見つける
-	Coordinate c;
+	
 
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
@@ -195,7 +222,7 @@ void Game::update()
 					}
 				}
 			if (canPut[i + 1][j + 1] > 0) { //ひっくり返り得る数を表示
-				font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i, Origin.y + gridSize * j, Palette::White);
+				//font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i, Origin.y + gridSize * j, Palette::White);
 
 			}
 			else {
@@ -222,7 +249,7 @@ void Game::update()
         }
       }
       if (canPut[i + 1][j + 1] > 0) { //ひっくり返り得る数を表示
-        font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i +5, Origin.y + gridSize * j + 5, Palette::White);
+        //font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i +5, Origin.y + gridSize * j + 5, Palette::White);
         smallStone[i][j].draw(Palette::Darkgoldenrod);
       }
       //////////終わり
@@ -268,6 +295,18 @@ void Game::update()
 			maxPut = Max(canPut[i][j], maxPut);
 		}
 	}
+
+  //スコアが最大の場所を探す
+  int maxScore = -1000;
+  for (int i = 1; i < 9; i++) {
+    for (int j = 1; j < 9; j++) {
+      if (canPut[i][j] > 0) {
+        maxScore = Max(maxScore, score[i][j]);
+      }
+    }
+  }
+  //置く場所を決定する
+  
 	//Print << U"max:" << maxPut;
 	int32 I, J;
   SimpleGUI::CheckBox(ai, U"Computer", Vec2(10, 150));
@@ -295,7 +334,7 @@ void Game::update()
 
         }
       
-				if (innerCell[I][J] == 0 && canPut[I][J] > 0 && (canPut[I][J] == maxPut /*|| Random()*100 > turn + 30*/)) {
+				if (innerCell[I][J] == 0 && canPut[I][J] > 0 && (score[I][J] == maxScore || canPut[I][J] == maxPut && turn >= 55)) {
 					turn++;
 					innerCell[I][J] = turn % 2 + 1; //1なら黒、2なら白
 					record[turn].x = I; //置いた場所を記録
@@ -316,13 +355,11 @@ void Game::update()
 		if (put == false) {
 			//turn++;
       pleaseSkip = true;
-			font(U"スキップしてください").draw(Origin.x + gridSize * 2, Origin.y + gridSize * 3);
+			//font(U"スキップしてください").draw(Origin.x + gridSize * 2, Origin.y + gridSize * 3);
 		}
 	}
-
-  if (pleaseSkip == true) {
-    font(U"スキップしてください").draw(Origin.x + gridSize * 2, Origin.y + gridSize * 3);
-  }
+  
+  
 	//そのターンで置かれた場所に印をつける
 	if (record[turn].x > 0 && record[turn].y > 0) {
 		smallStone[record[turn].x - 1][record[turn].y - 1].draw(Palette::Aqua);
@@ -370,9 +407,28 @@ void Game::update()
 	font(black).draw(700, 100, Palette::Black);
 	font(white).draw(700, 150);
 
+    //RectF(Arg::center(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8)), gridSize * 6, gridSize).draw(ColorF(0.4, 0.7, 0.4, 0.5));
+  if (black + white >= 64) {
+    pleaseSkip = false;
+
+    if (black > white) {
+      font(U"黒の勝ち！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    }
+    else if (black < white) {
+      font(U"白の勝ち！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    }
+    else {
+      font(U"引き分け！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    }
+  }
+  if (pleaseSkip == true) {
+    font(U"スキップしてください").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+  }
+  /*
 	if (oncePerSecond % 60 == 0) {
-		Print << staticScore(2);
+		Print << staticScore(0);
 	}
+  */
 	put = false; //元に戻す
 
 
@@ -405,6 +461,25 @@ void Game::update()
 
   //タイトル画面に戻る
 	if (SimpleGUI::Button(U"end", Vec2(10,500))) {
+    Scene::SetBackground(ColorF(0.2, 0.8, 0.4));
+
+    //盤面のリセット
+    for (int i = 1; i < 9; i++) {
+      for (int j = 1; j < 9; j++) {
+        innerCell[i][j] = 0;
+        record[i * 10 + j] = { 0 }; //記録をリセット
+        for (int t = 0; t < DEPTH; t++) {
+          deepCell[t][i][j] = 0;
+        }
+      }
+    }
+    turn = 1; //手数もリセット
+    innerCell[4][4] = deepCell[1][4][4] = 1;
+    innerCell[4][5] = deepCell[1][4][5] = 2;
+    innerCell[5][4] = deepCell[1][5][4] = 2;
+    innerCell[5][5] = deepCell[1][5][5] = 1;
+    pleaseSkip = false;
+
     changeScene(State::Title);
     getData().highScore = 999;
       //Max(getData().highScore, m_score);
@@ -486,7 +561,8 @@ int flip_stone(int k, Coordinate c, int a) {
 			for (int count = 0; deepCell[c.turn][i][j] != c.status && deepCell[c.turn][i][j] > 0; count++) {
 				push(i * 10 + j);
 				n++;
-				//Print << U"pushされた"<<i*10 + j;
+        //if(Z!=0)
+				  //Print << U"pushされた"<<i*10 + j;
 				i += X;
 				j += Y;
 				m = 1;
@@ -501,6 +577,7 @@ int flip_stone(int k, Coordinate c, int a) {
 					}
 					else if (a >= 1) {
 						deepCell[c.turn][tmp / 10][tmp % 10] = c.status;
+            //Print << U"deep" << c.turn;
 					}
 					//Print << U"popされた"<<tmp;
 					ans++;
@@ -529,36 +606,34 @@ int staticScore(int d) {
 	//s = 0;
 	//int k = 0;
 	int ans = 0;
-	//int canPut[10][10] = { 0 };
-  int s = 0;
-	while (s < 2)
-	{
-		s++;
-	}
+	int s_canPut[10][10] = { 0 };
+ 
 	
 
   //今の番のプレイヤーが置ける場所の数をカウント
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
 			for (int k = 0; k < 8; k++) {
-				Coordinate c = { i, j, (d + 1) % 2 + 1, d + 1 };
-				canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
+				Coordinate c = { i, j, (d + 1) % 2 + 1, d };
+				s_canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
 				if (innerCell[i][j] != 0) {
-					canPut[i][j] = 0; //置ける場所でなかったら0に戻す
+					//s_canPut[i][j] = 0; //置ける場所でなかったら0に戻す
 				}
 			}
+      //Print << U"s_"<<s_canPut[i][j];
 		}
 	}
 	for (int i = 1; i < 9; i++) {
 		for (int j = 0; j < 9; j++) {
-			if (canPut[i][j] > 0) {
+			if (s_canPut[i][j] > 0) {
 				ans++;
 			}
 		}
 	}
+  //Print << d << U":" <<U"+"<<ans;
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      canPut[i][j] = 0;
+      s_canPut[i][j] = 0;
     }
   }
   
@@ -566,61 +641,66 @@ int staticScore(int d) {
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
       for (int k = 0; k < 8; k++) {
-        Coordinate c = { i, j, (d + 2) % 2 + 1, d + 1 };
+        Coordinate c = { i, j, (d + 2) % 2 + 1, d };
         if (d > turn) {
-          canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
+          s_canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
         }
         else {
-          canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
+          s_canPut[i][j] += flip_stone(k, c, 0); //ひっくり返さない
         }
         if (innerCell[i][j] != 0) {
-          canPut[i][j] = 0; //置ける場所でなかったら0に戻す
+          s_canPut[i][j] = 0; //置ける場所でなかったら0に戻す
         }
       }
     }
   }
+  int mm = 0;
   for (int i = 1; i < 9; i++) {
     for (int j = 0; j < 9; j++) {
-      if (canPut[i][j] > 0) {
+      if (s_canPut[i][j] > 0) {
         ans--;
+        mm++;
       }
     }
   }
+  //Print << d << U":" <<U"-"<<mm;
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
-      canPut[i][j] = 0;
+      s_canPut[i][j] = 0;
     }
   }
   
-  ans *= 10;
+  ans *= 15;
+
   int tu = (turn - 1) % 2 + 1;
   
   //角
+  int32 corner = 10;
   if (deepCell[d][1][1] == tu) {
-    ans += 5;
+    ans += 15;
     if (deepCell[d][1][2] == tu || deepCell[d][2][1] == tu || deepCell[d][2][2] == tu) {
-      ans += 10;
+      ans += corner;
     }
     //Print << U"角";
   }
   if (deepCell[d][1][8] == tu) {
-    ans += 5;
+    ans += 15;
     if (deepCell[d][1][7] == tu || deepCell[d][2][8] == tu || deepCell[d][2][7] == tu) {
-      ans += 10;
+      ans += corner;
     }
     //Print << U"角";
   }
   if (deepCell[d][8][1] == tu) {
-    ans += 5;
+    ans += 15;
     if (deepCell[d][8][2] == tu || deepCell[d][7][1] == tu || deepCell[d][7][2] == tu) {
-      ans += 10;
+      ans += corner;
     }
     //Print << U"角";
   }
   if (deepCell[d][8][8] == tu) {
-    ans += 5;
+    ans += 15;
     if (deepCell[d][8][7] == tu || deepCell[d][7][8] == tu || deepCell[d][7][7] == tu) {
-      ans += 10;
+      ans += corner;
     }
     //Print << U"角";
   }
@@ -629,112 +709,112 @@ int staticScore(int d) {
   //横
   if (deepCell[d][3][1] == tu) {
     if (deepCell[d][2][1] == tu && deepCell[d][1][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][2][1] == 0 && deepCell[d][1][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //斜め
   if (deepCell[d][3][3] == tu) {
     if (deepCell[d][2][2] == tu && deepCell[d][1][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][2][2] == 0 && deepCell[d][1][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //縦
   if (deepCell[d][1][3] == tu) {
     if (deepCell[d][1][2] == tu && deepCell[d][1][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][1][2] == 0 && deepCell[d][1][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //8,1の周辺
   //横
   if (deepCell[d][6][1] == tu) {
     if (deepCell[d][7][1] == tu && deepCell[d][8][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][7][1] == 0 && deepCell[d][8][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //斜め
   if (deepCell[d][6][3] == tu) {
     if (deepCell[d][7][2] == tu && deepCell[d][8][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][7][2] == 0 && deepCell[d][8][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //縦
   if (deepCell[d][8][3] == tu) {
     if (deepCell[d][8][2] == tu && deepCell[d][8][1] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][8][2] == 0 && deepCell[d][8][1] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //1,8の周辺
   //横
   if (deepCell[d][3][8] == tu) {
     if (deepCell[d][2][8] == tu && deepCell[d][1][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][2][8] == 0 && deepCell[d][1][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //斜め
   if (deepCell[d][3][6] == tu) {
     if (deepCell[d][2][7] == tu && deepCell[d][1][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][2][7] == 0 && deepCell[d][1][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //縦
   if (deepCell[d][1][6] == tu) {
     if (deepCell[d][1][7] == tu && deepCell[d][1][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][1][7] == 0 && deepCell[d][1][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //8,8の周辺
   //横
   if (deepCell[d][6][8] == tu) {
     if (deepCell[d][7][8] == tu && deepCell[d][8][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][7][8] == 0 && deepCell[d][8][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //斜め
   if (deepCell[d][6][6] == tu) {
     if (deepCell[d][7][7] == tu && deepCell[d][8][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][7][7] == 0 && deepCell[d][8][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   //縦
   if (deepCell[d][8][6] == tu) {
     if (deepCell[d][8][7] == tu && deepCell[d][8][8] == 0) {
-      ans -= 5;
+      ans -= 10;
     }
     else if (deepCell[d][8][7] == 0 && deepCell[d][8][8] == 0) {
-      ans += 1;
+      ans += 3;
     }
   }
   

@@ -25,7 +25,7 @@ void Main()
 	//System::SetTerminationTriggers(UserAction::CloseButtonClicked);
 
 	// タイトルを設定
-	Window::SetTitle(U"くずし");
+	Window::SetTitle(U"Reversi");
 
 	// 背景色を設定
 	Scene::SetBackground(ColorF(0.2, 0.8, 0.4));

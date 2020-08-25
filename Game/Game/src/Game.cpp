@@ -311,7 +311,7 @@ void Game::update()
 	int32 I, J;
   SimpleGUI::CheckBox(ai, U"Computer", Vec2(10, 150));
 	if (ai == true && turn % 2 == 0) {
-		int32 m = Random() * 100, n = Random() * 100;
+		int32 m =(int32) Random() * 100, n = (int32) Random() * 100;
 		for (int i = 1; i < 9; i++) {
 			for (int j = 1; j < 9; j++) {
 				if (m >= 50 && n >= 50) {
@@ -420,6 +420,12 @@ void Game::update()
     else {
       font(U"引き分け！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
     }
+  }
+  if (black == 0) {
+    font(U"白の完勝！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+  }
+  else if (white == 0) {
+    font(U"黒の完勝！").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
   }
   if (pleaseSkip == true) {
     font(U"スキップしてください").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));

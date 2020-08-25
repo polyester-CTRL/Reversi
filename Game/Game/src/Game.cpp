@@ -9,10 +9,10 @@ typedef struct {
 	int turn;
 }Coordinate;
 
-Coordinate record[64] = { 0 }; //ˆêè‚²‚Æ‚É‹L˜^‚·‚é
-int innerCell[10][10] = { 0 }; //Î‚ÌêŠ‚ğ‹L‰¯‚·‚é —ÌˆæŠO‚àŠÜ‚Ş
-int deepCell[100][10][10] = { 0 }; //‚èæ‚ğ“Ç‚Ş—p
-int turn = 1; //è”‚ğ”‚¦‚é
+Coordinate record[64] = { 0 }; //ä¸€æ‰‹ã”ã¨ã«è¨˜éŒ²ã™ã‚‹
+int innerCell[10][10] = { 0 }; //çŸ³ã®å ´æ‰€ã‚’è¨˜æ†¶ã™ã‚‹ é ˜åŸŸå¤–ã‚‚å«ã‚€
+int deepCell[100][10][10] = { 0 }; //ï½æ‰‹å…ˆã‚’èª­ã‚€ç”¨
+int turn = 1; //æ‰‹æ•°ã‚’æ•°ãˆã‚‹
 
 int stack[60] = { 0 };
 int sp = 0;
@@ -34,30 +34,30 @@ const int32 gridSize = 60;
 const Rect rectFrame(Origin.x, Origin.y, gridSize * 8, gridSize * 8);
 const Line LineX(Origin.x + 60, Origin.y, Origin.x + 60, Origin.y + 480);
 const Line LineY(Origin.x, Origin.y + gridSize, Origin.x + 480, Origin.y + gridSize);
-Rect cell[8][8]; //ƒNƒŠƒbƒN‚³‚ê‚½—Ìˆæ‚ğŒŸo‚·‚é‚¾‚¯
-Circle stone[8][8]; //Î‚ÌŒ`óA‘å‚«‚³‚ğŒˆ‚ßAÀ•W‚ğ‚¢‚ê‚ÄÎ‚ğ•\¦‚·‚é
+Rect cell[8][8]; //ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸé ˜åŸŸã‚’æ¤œå‡ºã™ã‚‹ã ã‘
+Circle stone[8][8]; //çŸ³ã®å½¢çŠ¶ã€å¤§ãã•ã‚’æ±ºã‚ã€åº§æ¨™ã‚’ã„ã‚Œã¦çŸ³ã‚’è¡¨ç¤ºã™ã‚‹
 Circle smallStone[8][8];
-//const Font font(100); //ƒƒbƒZ[ƒW‚ğ•\¦‚·‚é‚½‚ß‚É—pˆÓ
+//const Font font(100); //ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤ºã™ã‚‹ãŸã‚ã«ç”¨æ„
 
-bool search = true;  //’Tõ‚·‚é‚©‚µ‚È‚¢‚©Œˆ‚ß‚é
-bool ai = true;      //ƒRƒ“ƒsƒ…[ƒ^‘Îí‚·‚é‚©‚µ‚È‚¢‚©
-bool put = false;    //Î‚ª’u‚©‚ê‚½‚¾‚¯true‚É‚·‚é
+bool search = true;  //æ¢ç´¢ã™ã‚‹ã‹ã—ãªã„ã‹æ±ºã‚ã‚‹
+bool ai = true;      //ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ã‚¿å¯¾æˆ¦ã™ã‚‹ã‹ã—ãªã„ã‹
+bool put = false;    //çŸ³ãŒç½®ã‹ã‚ŒãŸæ™‚ã ã‘trueã«ã™ã‚‹
 
 
 int32 canPut[10][10] = { 0 };
 
-int32 oncePerSecond = 0; //1•b‚Éˆê‰ñ‚­‚ç‚¢Às‚µ‚½‚¢‚à‚Ì‚Ég‚¤
+int32 oncePerSecond = 0; //1ç§’ã«ä¸€å›ãã‚‰ã„å®Ÿè¡Œã—ãŸã„ã‚‚ã®ã«ä½¿ã†
 
 Game::Game(const InitData& init)
 	: IScene(init)
 {
-	// ‰¡ (Scene::Width() / blockSize.x) ŒÂAc 5 ŒÂ‚ÌƒuƒƒbƒN‚ğ”z—ñ‚É’Ç‰Á‚·‚é
+	// æ¨ª (Scene::Width() / blockSize.x) å€‹ã€ç¸¦ 5 å€‹ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’é…åˆ—ã«è¿½åŠ ã™ã‚‹
 	for (auto p : step(Size((Scene::Width() / blockSize.x), 5)))
 	{
 		m_blocks << Rect(p.x * blockSize.x, 60 + p.y * blockSize.y, blockSize);
 	}
 
-	//’†SÀ•W‚ğ‘ã“ü‚·‚é
+	//ä¸­å¿ƒåº§æ¨™ã‚’ä»£å…¥ã™ã‚‹
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
 			cell[i][j] = Rect(Origin.x + gridSize * i, Origin.y + gridSize * j, 60);
@@ -66,7 +66,7 @@ Game::Game(const InitData& init)
 		}
 	}
 
-	//•Ç‚Ì•”•ª‚Ì”z—ñ‚Í-1‚ğ“ü‚ê‚é
+	//å£ã®éƒ¨åˆ†ã®é…åˆ—ã¯-1ã‚’å…¥ã‚Œã‚‹
 	for (int i = 0; i < 10; i++)
 	{
 		innerCell[i][0] = -1;
@@ -94,33 +94,33 @@ void Game::update()
 {
 	/****************************************************************************/
 	/*
-	// ƒpƒhƒ‹‚ğ‘€ì
+	// ãƒ‘ãƒ‰ãƒ«ã‚’æ“ä½œ
 	m_paddle = Rect(Arg::center(Cursor::Pos().x, 500), 60, 10);
 
-	// ƒ{[ƒ‹‚ğˆÚ“®
+	// ãƒœãƒ¼ãƒ«ã‚’ç§»å‹•
 	m_ball.moveBy(m_ballVelocity * Scene::DeltaTime());
 
-	// ƒuƒƒbƒN‚ğ‡‚Éƒ`ƒFƒbƒN
+	// ãƒ–ãƒ­ãƒƒã‚¯ã‚’é †ã«ãƒã‚§ãƒƒã‚¯
 	for (auto it = m_blocks.begin(); it != m_blocks.end(); ++it)
 	{
-		// ƒ{[ƒ‹‚ÆƒuƒƒbƒN‚ªŒğ·‚µ‚Ä‚¢‚½‚ç
+		// ãƒœãƒ¼ãƒ«ã¨ãƒ–ãƒ­ãƒƒã‚¯ãŒäº¤å·®ã—ã¦ã„ãŸã‚‰
 		if (it->intersects(m_ball))
 		{
-			// ƒ{[ƒ‹‚ÌŒü‚«‚ğ”½“]‚·‚é
+			// ãƒœãƒ¼ãƒ«ã®å‘ãã‚’åè»¢ã™ã‚‹
 			(it->bottom().intersects(m_ball) || it->top().intersects(m_ball) ? m_ballVelocity.y : m_ballVelocity.x) *= -1;
 
-			// ƒuƒƒbƒN‚ğ”z—ñ‚©‚çíœiƒCƒeƒŒ[ƒ^‚ª–³Œø‚É‚È‚é‚Ì‚Å’ˆÓj
+			// ãƒ–ãƒ­ãƒƒã‚¯ã‚’é…åˆ—ã‹ã‚‰å‰Šé™¤ï¼ˆã‚¤ãƒ†ãƒ¬ãƒ¼ã‚¿ãŒç„¡åŠ¹ã«ãªã‚‹ã®ã§æ³¨æ„ï¼‰
 			m_blocks.erase(it);
 
-			// ƒXƒRƒA‚ğ‰ÁZ
+			// ã‚¹ã‚³ã‚¢ã‚’åŠ ç®—
 			++m_score;
 
-			// ‚±‚êˆÈãƒ`ƒFƒbƒN‚µ‚È‚¢  
+			// ã“ã‚Œä»¥ä¸Šãƒã‚§ãƒƒã‚¯ã—ãªã„  
 			break;
 		}
 	}
 
-	// “Vˆä‚É‚Ô‚Â‚©‚Á‚½‚ç‚Í‚Ë•Ô‚é
+	// å¤©äº•ã«ã¶ã¤ã‹ã£ãŸã‚‰ã¯ã­è¿”ã‚‹
 	if (m_ball.y < 0 && m_ballVelocity.y < 0)
 	{
 		m_ballVelocity.y *= -1;
@@ -132,16 +132,16 @@ void Game::update()
 		getData().highScore = Max(getData().highScore, m_score);
 	}
 
-	// ¶‰E‚Ì•Ç‚É‚Ô‚Â‚©‚Á‚½‚ç‚Í‚Ë•Ô‚é
+	// å·¦å³ã®å£ã«ã¶ã¤ã‹ã£ãŸã‚‰ã¯ã­è¿”ã‚‹
 	if ((m_ball.x < 0 && m_ballVelocity.x < 0) || (Scene::Width() < m_ball.x && m_ballVelocity.x > 0))
 	{
 		m_ballVelocity.x *= -1;
 	}
 
-	// ƒpƒhƒ‹‚É‚ ‚½‚Á‚½‚ç‚Í‚Ë•Ô‚é
+	// ãƒ‘ãƒ‰ãƒ«ã«ã‚ãŸã£ãŸã‚‰ã¯ã­è¿”ã‚‹
 	if (m_ballVelocity.y > 0 && m_paddle.intersects(m_ball))
 	{
-		// ƒpƒhƒ‹‚Ì’†S‚©‚ç‚Ì‹——£‚É‰‚¶‚Ä‚Í‚Ë•Ô‚éŒü‚«‚ğ•Ï‚¦‚é
+		// ãƒ‘ãƒ‰ãƒ«ã®ä¸­å¿ƒã‹ã‚‰ã®è·é›¢ã«å¿œã˜ã¦ã¯ã­è¿”ã‚‹å‘ãã‚’å¤‰ãˆã‚‹
 		m_ballVelocity = Vec2((m_ball.x - m_paddle.center().x) * 10, -m_ballVelocity.y).setLength(speed);
 	}
 
@@ -154,7 +154,7 @@ void Game::update()
 		oncePerSecond = 0;
     getData().tmpTime = (int32)Scene::Time();
 	}
-	//”Õ–Ê
+	//ç›¤é¢
 	Scene::SetBackground(ColorF(0.2,0.8,0.3));
   //Scene::SetBackground(ColorF(0.2, 0.8, 0.4));
 	rectFrame.drawFrame(0, 3, Palette::Black);
@@ -166,28 +166,28 @@ void Game::update()
 	}
 
 
-  //Î‚ğ’u‚¯‚éêŠ‚ğŒ©‚Â‚¯‚é
+  //çŸ³ã‚’ç½®ã‘ã‚‹å ´æ‰€ã‚’è¦‹ã¤ã‘ã‚‹
   Coordinate c;
 
-  //cell‚²‚Æ‚ÉƒXƒRƒAŒvZ
+  //cellã”ã¨ã«ã‚¹ã‚³ã‚¢è¨ˆç®—
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
-      ///////////Œ³‚Ì•”•ª
-      c = { i + 1, j + 1, (turn + 1) % 2 + 1, turn }; //’TõŠÖ”‚É‘—‚éî•ñ
-      for (int k = 0; k < 8; k++) { //’Tõ•ûŒü‚ğŒˆ‚ß‚é
+      ///////////å…ƒã®éƒ¨åˆ†
+      c = { i + 1, j + 1, (turn + 1) % 2 + 1, turn }; //æ¢ç´¢é–¢æ•°ã«é€ã‚‹æƒ…å ±
+      for (int k = 0; k < 8; k++) { //æ¢ç´¢æ–¹å‘ã‚’æ±ºã‚ã‚‹
 
-        canPut[i + 1][j + 1] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+        canPut[i + 1][j + 1] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
         if (innerCell[i + 1][j + 1] != 0) {
-          canPut[i + 1][j + 1] = 0; //’u‚¯‚éêŠ‚Å‚È‚©‚Á‚½‚ç0‚É–ß‚·
+          canPut[i + 1][j + 1] = 0; //ç½®ã‘ã‚‹å ´æ‰€ã§ãªã‹ã£ãŸã‚‰0ã«æˆ»ã™
         }
       }
       /*
-      if (canPut[i + 1][j + 1] > 0) { //‚Ğ‚Á‚­‚è•Ô‚è“¾‚é”‚ğ•\¦
+      if (canPut[i + 1][j + 1] > 0) { //ã²ã£ãã‚Šè¿”ã‚Šå¾—ã‚‹æ•°ã‚’è¡¨ç¤º
         font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i + 5, Origin.y + gridSize * j + 5, Palette::White);
         smallStone[i][j].draw(Palette::Darkgoldenrod);
       }
       */
-      //////////I‚í‚è
+      //////////çµ‚ã‚ã‚Š
     }
   }
   int32 score[10][10] = { 0 };
@@ -212,16 +212,16 @@ void Game::update()
   
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
-			c = { i + 1, j + 1, (turn + 2) % 2 + 1, turn }; //’TõŠÖ”‚É‘—‚éî•ñ
+			c = { i + 1, j + 1, (turn + 2) % 2 + 1, turn }; //æ¢ç´¢é–¢æ•°ã«é€ã‚‹æƒ…å ±
 			//if (oncePerSecond % 3 == 0)
-				for (int k = 0; k < 8; k++) { //’Tõ•ûŒü‚ğŒˆ‚ß‚é
+				for (int k = 0; k < 8; k++) { //æ¢ç´¢æ–¹å‘ã‚’æ±ºã‚ã‚‹
 
-					canPut[i + 1][j + 1] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+					canPut[i + 1][j + 1] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
 					if (innerCell[i + 1][j + 1] != 0) {
-						canPut[i + 1][j + 1] = 0; //’u‚¯‚éêŠ‚Å‚È‚©‚Á‚½‚ç0‚É–ß‚·
+						canPut[i + 1][j + 1] = 0; //ç½®ã‘ã‚‹å ´æ‰€ã§ãªã‹ã£ãŸã‚‰0ã«æˆ»ã™
 					}
 				}
-			if (canPut[i + 1][j + 1] > 0) { //‚Ğ‚Á‚­‚è•Ô‚è“¾‚é”‚ğ•\¦
+			if (canPut[i + 1][j + 1] > 0) { //ã²ã£ãã‚Šè¿”ã‚Šå¾—ã‚‹æ•°ã‚’è¡¨ç¤º
 				//font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i, Origin.y + gridSize * j, Palette::White);
 
 			}
@@ -238,37 +238,37 @@ void Game::update()
   
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
-      ///////////Œ³‚Ì•”•ª
-      c = { i + 1, j + 1, (turn + 1) % 2 + 1, turn }; //’TõŠÖ”‚É‘—‚éî•ñ
+      ///////////å…ƒã®éƒ¨åˆ†
+      c = { i + 1, j + 1, (turn + 1) % 2 + 1, turn }; //æ¢ç´¢é–¢æ•°ã«é€ã‚‹æƒ…å ±
       //if (oncePerSecond % 3 == 0)
-      for (int k = 0; k < 8; k++) { //’Tõ•ûŒü‚ğŒˆ‚ß‚é
+      for (int k = 0; k < 8; k++) { //æ¢ç´¢æ–¹å‘ã‚’æ±ºã‚ã‚‹
 
-        canPut[i + 1][j + 1] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+        canPut[i + 1][j + 1] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
         if (innerCell[i + 1][j + 1] != 0) {
-          canPut[i + 1][j + 1] = 0; //’u‚¯‚éêŠ‚Å‚È‚©‚Á‚½‚ç0‚É–ß‚·
+          canPut[i + 1][j + 1] = 0; //ç½®ã‘ã‚‹å ´æ‰€ã§ãªã‹ã£ãŸã‚‰0ã«æˆ»ã™
         }
       }
-      if (canPut[i + 1][j + 1] > 0) { //‚Ğ‚Á‚­‚è•Ô‚è“¾‚é”‚ğ•\¦
+      if (canPut[i + 1][j + 1] > 0) { //ã²ã£ãã‚Šè¿”ã‚Šå¾—ã‚‹æ•°ã‚’è¡¨ç¤º
         //font(canPut[i + 1][j + 1]).draw(Origin.x + gridSize * i +5, Origin.y + gridSize * j + 5, Palette::White);
         smallStone[i][j].draw(Palette::Darkgoldenrod);
       }
-      //////////I‚í‚è
+      //////////çµ‚ã‚ã‚Š
     }
   }
   
   
 
-	//ƒNƒŠƒbƒN‚µ‚½‚Æ‚±‚ë‚ÉÎ‚ğ’u‚­
+	//ã‚¯ãƒªãƒƒã‚¯ã—ãŸã¨ã“ã‚ã«çŸ³ã‚’ç½®ã
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
 			if (cell[i][j].leftClicked() && innerCell[i + 1][j + 1] == 0 && canPut[i + 1][j + 1] > 0) {
 				turn++;
-				innerCell[i + 1][j + 1] = turn % 2 + 1; //1‚È‚ç•A2‚È‚ç”’
-				record[turn].x = i + 1; //’u‚¢‚½êŠ‚ğ‹L˜^
+				innerCell[i + 1][j + 1] = turn % 2 + 1; //1ãªã‚‰é»’ã€2ãªã‚‰ç™½
+				record[turn].x = i + 1; //ç½®ã„ãŸå ´æ‰€ã‚’è¨˜éŒ²
 				record[turn].y = j + 1;
 				record[turn].turn = turn;
-				record[turn].status = innerCell[i + 1][j + 1]; //F‚ğ‹L˜^
-				put = true; //’Tõ‚³‚¹‚é
+				record[turn].status = innerCell[i + 1][j + 1]; //è‰²ã‚’è¨˜éŒ²
+				put = true; //æ¢ç´¢ã•ã›ã‚‹
 			}
 
 			if (innerCell[i + 1][j + 1] == 1) {
@@ -277,7 +277,7 @@ void Game::update()
 			else if (innerCell[i + 1][j + 1] == 2) {
 				//stone[i][j].draw(Palette::White);
 			}
-      //Î‚ğ•\¦
+      //çŸ³ã‚’è¡¨ç¤º
 			if (deepCell[turn][i + 1][j + 1] == 1) {
 				stone[i][j].draw(Palette::Black);
 			}
@@ -288,7 +288,7 @@ void Game::update()
 	}
 
 
-	//ƒ‰ƒ“ƒ_ƒ€‚É’u‚­
+	//ãƒ©ãƒ³ãƒ€ãƒ ã«ç½®ã
 	int maxPut = 0;
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
@@ -296,7 +296,7 @@ void Game::update()
 		}
 	}
 
-  //ƒXƒRƒA‚ªÅ‘å‚ÌêŠ‚ğ’T‚·
+  //ã‚¹ã‚³ã‚¢ãŒæœ€å¤§ã®å ´æ‰€ã‚’æ¢ã™
   int maxScore = -1000;
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
@@ -305,13 +305,13 @@ void Game::update()
       }
     }
   }
-  //’u‚­êŠ‚ğŒˆ’è‚·‚é
+  //ç½®ãå ´æ‰€ã‚’æ±ºå®šã™ã‚‹
   
 	//Print << U"max:" << maxPut;
 	int32 I, J;
   SimpleGUI::CheckBox(ai, U"Computer", Vec2(10, 150));
 	if (ai == true && turn % 2 == 0) {
-		int32 m =(int32) Random() * 100, n = (int32) Random() * 100;
+		int32 m = Random() * 100, n = Random() * 100;
 		for (int i = 1; i < 9; i++) {
 			for (int j = 1; j < 9; j++) {
 				if (m >= 50 && n >= 50) {
@@ -336,12 +336,12 @@ void Game::update()
       
 				if (innerCell[I][J] == 0 && canPut[I][J] > 0 && (score[I][J] == maxScore || canPut[I][J] == maxPut && turn >= 55)) {
 					turn++;
-					innerCell[I][J] = turn % 2 + 1; //1‚È‚ç•A2‚È‚ç”’
-					record[turn].x = I; //’u‚¢‚½êŠ‚ğ‹L˜^
+					innerCell[I][J] = turn % 2 + 1; //1ãªã‚‰é»’ã€2ãªã‚‰ç™½
+					record[turn].x = I; //ç½®ã„ãŸå ´æ‰€ã‚’è¨˜éŒ²
 					record[turn].y = J;
 					record[turn].turn = turn;
-					record[turn].status = innerCell[I][J]; //F‚ğ‹L˜^
-					put = true; //’Tõ‚³‚¹‚é
+					record[turn].status = innerCell[I][J]; //è‰²ã‚’è¨˜éŒ²
+					put = true; //æ¢ç´¢ã•ã›ã‚‹
 				}
 				if (put == true) {
 					break;
@@ -351,21 +351,21 @@ void Game::update()
 				break;
 			}
 		}
-		//ƒXƒLƒbƒv‚µ‚Ä‚à‚ç‚¤
+		//ã‚¹ã‚­ãƒƒãƒ—ã—ã¦ã‚‚ã‚‰ã†
 		if (put == false) {
 			//turn++;
       pleaseSkip = true;
-			//font(U"ƒXƒLƒbƒv‚µ‚Ä‚­‚¾‚³‚¢").draw(Origin.x + gridSize * 2, Origin.y + gridSize * 3);
+			//font(U"ã‚¹ã‚­ãƒƒãƒ—ã—ã¦ãã ã•ã„").draw(Origin.x + gridSize * 2, Origin.y + gridSize * 3);
 		}
 	}
   
   
-	//‚»‚Ìƒ^[ƒ“‚Å’u‚©‚ê‚½êŠ‚Éˆó‚ğ‚Â‚¯‚é
+	//ãã®ã‚¿ãƒ¼ãƒ³ã§ç½®ã‹ã‚ŒãŸå ´æ‰€ã«å°ã‚’ã¤ã‘ã‚‹
 	if (record[turn].x > 0 && record[turn].y > 0) {
 		smallStone[record[turn].x - 1][record[turn].y - 1].draw(Palette::Aqua);
 	}
 
-	//•ÏX‚ğdeepCell‚É‚à”½‰f‚³‚¹‚é
+	//å¤‰æ›´ã‚’deepCellã«ã‚‚åæ˜ ã•ã›ã‚‹
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
 			deepCell[turn][i][j] = innerCell[i][j];
@@ -373,26 +373,26 @@ void Game::update()
 	}
 
 	int ans = 0;
-	//Î‚ğ©“®‚Å‚Ğ‚Á‚­‚è•Ô‚·
-	//SimpleGUI::CheckBox(search, U"Î‚ğ•Ô‚·", Vec2(500, 40));
-	if (search == true && put == true) { //ƒ`ƒFƒbƒNƒ{ƒbƒNƒXtrue‚ÅÎ‚ª’u‚©‚ê‚½‚ç’Tõ
+	//çŸ³ã‚’è‡ªå‹•ã§ã²ã£ãã‚Šè¿”ã™
+	//SimpleGUI::CheckBox(search, U"çŸ³ã‚’è¿”ã™", Vec2(500, 40));
+	if (search == true && put == true) { //ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹trueã§çŸ³ãŒç½®ã‹ã‚ŒãŸã‚‰æ¢ç´¢
 		ans = 0;
 		for (int k = 0; k < 8; k++) {
-			ans += flip_stone(k, record[turn], -1); //‚Ğ‚Á‚­‚è•Ô‚·
+			ans += flip_stone(k, record[turn], -1); //ã²ã£ãã‚Šè¿”ã™
 		}
 	}
-	//Print << U"•Ô‚µ‚½Î‚Ì”‚Í"<<ans;
+	//Print << U"è¿”ã—ãŸçŸ³ã®æ•°ã¯"<<ans;
 
-	//è”A‡”Ô‚ğ•\¦
-	font(U"è”", turn).draw(10, 200);
+	//æ‰‹æ•°ã€é †ç•ªã‚’è¡¨ç¤º
+	font(U"æ‰‹æ•°", turn).draw(10, 200);
 	if (turn % 2 == 0) {
-		font(U"”’‚Ì”Ô").draw(10, 250);
+		font(U"ç™½ã®ç•ª").draw(10, 250);
 	}
 	else {
-		font(U"•‚Ì”Ô").draw(10, 250);
+		font(U"é»’ã®ç•ª").draw(10, 250);
 	}
 
-	//Î‚Ì”‚ğ•\¦
+	//çŸ³ã®æ•°ã‚’è¡¨ç¤º
 	int32 black = 0, white = 0;
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
@@ -412,46 +412,46 @@ void Game::update()
     pleaseSkip = false;
 
     if (black > white) {
-      font(U"•‚ÌŸ‚¿I").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+      font(U"é»’ã®å‹ã¡ï¼").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
     }
     else if (black < white) {
-      font(U"”’‚ÌŸ‚¿I").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+      font(U"ç™½ã®å‹ã¡ï¼").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
     }
     else {
-      font(U"ˆø‚«•ª‚¯I").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+      font(U"å¼•ãåˆ†ã‘ï¼").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
     }
   }
   if (black == 0) {
-    font(U"”’‚ÌŠ®ŸI").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    font(U"ç™½ã®å®Œå‹ï¼").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
   }
   else if (white == 0) {
-    font(U"•‚ÌŠ®ŸI").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    font(U"é»’ã®å®Œå‹ï¼").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
   }
   if (pleaseSkip == true) {
-    font(U"ƒXƒLƒbƒv‚µ‚Ä‚­‚¾‚³‚¢").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
+    font(U"ã‚¹ã‚­ãƒƒãƒ—ã—ã¦ãã ã•ã„").drawAt(Origin.x + gridSize * 4, Origin.y + gridSize * (-0.8));
   }
   /*
 	if (oncePerSecond % 60 == 0) {
 		Print << staticScore(0);
 	}
   */
-	put = false; //Œ³‚É–ß‚·
+	put = false; //å…ƒã«æˆ»ã™
 
 
 	//Print << record[turn].x <<record[turn].y<<record[turn].status;
 
-	//Î‚ğÁ‹‚·‚éƒ{ƒ^ƒ“
+	//çŸ³ã‚’æ¶ˆå»ã™ã‚‹ãƒœã‚¿ãƒ³
 	if (SimpleGUI::Button(U"Clear", Vec2(10, 50))) {
 		for (int i = 1; i < 9; i++) {
 			for (int j = 1; j < 9; j++) {
 				innerCell[i][j] = 0;
-				record[i * 10 + j] = { 0 }; //‹L˜^‚ğƒŠƒZƒbƒg
+				record[i * 10 + j] = { 0 }; //è¨˜éŒ²ã‚’ãƒªã‚»ãƒƒãƒˆ
 				for (int t = 0; t < DEPTH; t++) {
 					deepCell[t][i][j] = 0;
 				}
 			}
 		}
-		turn = 1; //è”‚àƒŠƒZƒbƒg
+		turn = 1; //æ‰‹æ•°ã‚‚ãƒªã‚»ãƒƒãƒˆ
 		innerCell[4][4] = deepCell[1][4][4] = 1;
 		innerCell[4][5] = deepCell[1][4][5] = 2;
 		innerCell[5][4] = deepCell[1][5][4] = 2;
@@ -459,27 +459,27 @@ void Game::update()
     pleaseSkip = false;
 	}
 
-	//ƒXƒLƒbƒv‚·‚éƒ{ƒ^ƒ“
+	//ã‚¹ã‚­ãƒƒãƒ—ã™ã‚‹ãƒœã‚¿ãƒ³
 	if (SimpleGUI::Button(U"Skip", Vec2(10, 100))) {
 		turn++;
     pleaseSkip = false;
 	}
 
-  //ƒ^ƒCƒgƒ‹‰æ–Ê‚É–ß‚é
+  //ã‚¿ã‚¤ãƒˆãƒ«ç”»é¢ã«æˆ»ã‚‹
 	if (SimpleGUI::Button(U"end", Vec2(10,500))) {
     Scene::SetBackground(ColorF(0.2, 0.8, 0.4));
 
-    //”Õ–Ê‚ÌƒŠƒZƒbƒg
+    //ç›¤é¢ã®ãƒªã‚»ãƒƒãƒˆ
     for (int i = 1; i < 9; i++) {
       for (int j = 1; j < 9; j++) {
         innerCell[i][j] = 0;
-        record[i * 10 + j] = { 0 }; //‹L˜^‚ğƒŠƒZƒbƒg
+        record[i * 10 + j] = { 0 }; //è¨˜éŒ²ã‚’ãƒªã‚»ãƒƒãƒˆ
         for (int t = 0; t < DEPTH; t++) {
           deepCell[t][i][j] = 0;
         }
       }
     }
-    turn = 1; //è”‚àƒŠƒZƒbƒg
+    turn = 1; //æ‰‹æ•°ã‚‚ãƒªã‚»ãƒƒãƒˆ
     innerCell[4][4] = deepCell[1][4][4] = 1;
     innerCell[4][5] = deepCell[1][4][5] = 2;
     innerCell[5][4] = deepCell[1][5][4] = 2;
@@ -499,16 +499,16 @@ void Game::draw() const
 	/*
 	FontAsset(U"Score")(m_score).drawAt(Scene::Center().x, 30);
 
-	// ‚·‚×‚Ä‚ÌƒuƒƒbƒN‚ğ•`‰æ‚·‚é
+	// ã™ã¹ã¦ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚’æç”»ã™ã‚‹
 	for (const auto& block : m_blocks)
 	{
 		block.stretched(-1).draw(HSV(block.y - 40));
 	}
 
-	// ƒ{[ƒ‹‚ğ•`‚­
+	// ãƒœãƒ¼ãƒ«ã‚’æã
 	m_ball.draw();
 
-	// ƒpƒhƒ‹‚ğ•`‚­
+	// ãƒ‘ãƒ‰ãƒ«ã‚’æã
 	m_paddle.draw();
 	*/
 	/****************************************************************************/
@@ -522,7 +522,7 @@ int flip_stone(int k, Coordinate c, int a) {
 		Z = a;
 	}
 
-	//switch•¶‚Å’Tõ•ûŒü‚ğŒˆ‚ß‚é
+	//switchæ–‡ã§æ¢ç´¢æ–¹å‘ã‚’æ±ºã‚ã‚‹
 	switch (k) {
 	case 0:
 		X = 1, Y = 0;
@@ -552,7 +552,7 @@ int flip_stone(int k, Coordinate c, int a) {
 		break;
 	}
 
-	//’Tõ•”
+	//æ¢ç´¢éƒ¨
 	int i = c.x + X, j = c.y + Y;
 	int n = 0;
 	int m = 0;
@@ -568,7 +568,7 @@ int flip_stone(int k, Coordinate c, int a) {
 				push(i * 10 + j);
 				n++;
         //if(Z!=0)
-				  //Print << U"push‚³‚ê‚½"<<i*10 + j;
+				  //Print << U"pushã•ã‚ŒãŸ"<<i*10 + j;
 				i += X;
 				j += Y;
 				m = 1;
@@ -585,7 +585,7 @@ int flip_stone(int k, Coordinate c, int a) {
 						deepCell[c.turn][tmp / 10][tmp % 10] = c.status;
             //Print << U"deep" << c.turn;
 					}
-					//Print << U"pop‚³‚ê‚½"<<tmp;
+					//Print << U"popã•ã‚ŒãŸ"<<tmp;
 					ans++;
 					n--;
 				}
@@ -606,7 +606,7 @@ int pop() {
 	return tmp;
 }
 
-//dèæ‚Å‚ÌƒXƒRƒA‚ğŒvZ‚·‚é
+//dæ‰‹å…ˆã§ã®ã‚¹ã‚³ã‚¢ã‚’è¨ˆç®—ã™ã‚‹
 int staticScore(int d) {
   d += turn;
 	//s = 0;
@@ -616,14 +616,14 @@ int staticScore(int d) {
  
 	
 
-  //¡‚Ì”Ô‚ÌƒvƒŒƒCƒ„[‚ª’u‚¯‚éêŠ‚Ì”‚ğƒJƒEƒ“ƒg
+  //ä»Šã®ç•ªã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒç½®ã‘ã‚‹å ´æ‰€ã®æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
 	for (int i = 1; i < 9; i++) {
 		for (int j = 1; j < 9; j++) {
 			for (int k = 0; k < 8; k++) {
 				Coordinate c = { i, j, (d + 1) % 2 + 1, d };
-				s_canPut[i][j] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+				s_canPut[i][j] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
 				if (innerCell[i][j] != 0) {
-					//s_canPut[i][j] = 0; //’u‚¯‚éêŠ‚Å‚È‚©‚Á‚½‚ç0‚É–ß‚·
+					//s_canPut[i][j] = 0; //ç½®ã‘ã‚‹å ´æ‰€ã§ãªã‹ã£ãŸã‚‰0ã«æˆ»ã™
 				}
 			}
       //Print << U"s_"<<s_canPut[i][j];
@@ -643,19 +643,19 @@ int staticScore(int d) {
     }
   }
   
-  //‘ŠèƒvƒŒƒCƒ„|‚ª’u‚¯‚éêŠ‚Ì”‚ğƒJƒEƒ“ƒg
+  //ç›¸æ‰‹ãƒ—ãƒ¬ã‚¤ãƒ¤ï¼ãŒç½®ã‘ã‚‹å ´æ‰€ã®æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
       for (int k = 0; k < 8; k++) {
         Coordinate c = { i, j, (d + 2) % 2 + 1, d };
         if (d > turn) {
-          s_canPut[i][j] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+          s_canPut[i][j] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
         }
         else {
-          s_canPut[i][j] += flip_stone(k, c, 0); //‚Ğ‚Á‚­‚è•Ô‚³‚È‚¢
+          s_canPut[i][j] += flip_stone(k, c, 0); //ã²ã£ãã‚Šè¿”ã•ãªã„
         }
         if (innerCell[i][j] != 0) {
-          s_canPut[i][j] = 0; //’u‚¯‚éêŠ‚Å‚È‚©‚Á‚½‚ç0‚É–ß‚·
+          s_canPut[i][j] = 0; //ç½®ã‘ã‚‹å ´æ‰€ã§ãªã‹ã£ãŸã‚‰0ã«æˆ»ã™
         }
       }
     }
@@ -680,39 +680,39 @@ int staticScore(int d) {
 
   int tu = (turn - 1) % 2 + 1;
   
-  //Šp
+  //è§’
   int32 corner = 10;
   if (deepCell[d][1][1] == tu) {
     ans += 15;
     if (deepCell[d][1][2] == tu || deepCell[d][2][1] == tu || deepCell[d][2][2] == tu) {
       ans += corner;
     }
-    //Print << U"Šp";
+    //Print << U"è§’";
   }
   if (deepCell[d][1][8] == tu) {
     ans += 15;
     if (deepCell[d][1][7] == tu || deepCell[d][2][8] == tu || deepCell[d][2][7] == tu) {
       ans += corner;
     }
-    //Print << U"Šp";
+    //Print << U"è§’";
   }
   if (deepCell[d][8][1] == tu) {
     ans += 15;
     if (deepCell[d][8][2] == tu || deepCell[d][7][1] == tu || deepCell[d][7][2] == tu) {
       ans += corner;
     }
-    //Print << U"Šp";
+    //Print << U"è§’";
   }
   if (deepCell[d][8][8] == tu) {
     ans += 15;
     if (deepCell[d][8][7] == tu || deepCell[d][7][8] == tu || deepCell[d][7][7] == tu) {
       ans += corner;
     }
-    //Print << U"Šp";
+    //Print << U"è§’";
   }
 
-  //1,1‚Ìü•Ó
-  //‰¡
+  //1,1ã®å‘¨è¾º
+  //æ¨ª
   if (deepCell[d][3][1] == tu) {
     if (deepCell[d][2][1] == tu && deepCell[d][1][1] == 0) {
       ans -= 10;
@@ -721,7 +721,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //Î‚ß
+  //æ–œã‚
   if (deepCell[d][3][3] == tu) {
     if (deepCell[d][2][2] == tu && deepCell[d][1][1] == 0) {
       ans -= 10;
@@ -730,7 +730,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //c
+  //ç¸¦
   if (deepCell[d][1][3] == tu) {
     if (deepCell[d][1][2] == tu && deepCell[d][1][1] == 0) {
       ans -= 10;
@@ -739,8 +739,8 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //8,1‚Ìü•Ó
-  //‰¡
+  //8,1ã®å‘¨è¾º
+  //æ¨ª
   if (deepCell[d][6][1] == tu) {
     if (deepCell[d][7][1] == tu && deepCell[d][8][1] == 0) {
       ans -= 10;
@@ -749,7 +749,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //Î‚ß
+  //æ–œã‚
   if (deepCell[d][6][3] == tu) {
     if (deepCell[d][7][2] == tu && deepCell[d][8][1] == 0) {
       ans -= 10;
@@ -758,7 +758,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //c
+  //ç¸¦
   if (deepCell[d][8][3] == tu) {
     if (deepCell[d][8][2] == tu && deepCell[d][8][1] == 0) {
       ans -= 10;
@@ -767,8 +767,8 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //1,8‚Ìü•Ó
-  //‰¡
+  //1,8ã®å‘¨è¾º
+  //æ¨ª
   if (deepCell[d][3][8] == tu) {
     if (deepCell[d][2][8] == tu && deepCell[d][1][8] == 0) {
       ans -= 10;
@@ -777,7 +777,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //Î‚ß
+  //æ–œã‚
   if (deepCell[d][3][6] == tu) {
     if (deepCell[d][2][7] == tu && deepCell[d][1][8] == 0) {
       ans -= 10;
@@ -786,7 +786,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //c
+  //ç¸¦
   if (deepCell[d][1][6] == tu) {
     if (deepCell[d][1][7] == tu && deepCell[d][1][8] == 0) {
       ans -= 10;
@@ -795,8 +795,8 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //8,8‚Ìü•Ó
-  //‰¡
+  //8,8ã®å‘¨è¾º
+  //æ¨ª
   if (deepCell[d][6][8] == tu) {
     if (deepCell[d][7][8] == tu && deepCell[d][8][8] == 0) {
       ans -= 10;
@@ -805,7 +805,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //Î‚ß
+  //æ–œã‚
   if (deepCell[d][6][6] == tu) {
     if (deepCell[d][7][7] == tu && deepCell[d][8][8] == 0) {
       ans -= 10;
@@ -814,7 +814,7 @@ int staticScore(int d) {
       ans += 3;
     }
   }
-  //c
+  //ç¸¦
   if (deepCell[d][8][6] == tu) {
     if (deepCell[d][8][7] == tu && deepCell[d][8][8] == 0) {
       ans -= 10;
@@ -827,9 +827,9 @@ int staticScore(int d) {
 	return ans;
 }
 
-//x‚Í1-8,y‚à1-8, z‚Í[‚³
-//cell‚²‚Æ‚ÌƒXƒRƒA‚ğ•t‚¯‚é
-//’u‚¯‚È‚¢‚Æ‚±‚ë‚È‚ç0
+//xã¯1-8,yã‚‚1-8, zã¯æ·±ã•
+//cellã”ã¨ã®ã‚¹ã‚³ã‚¢ã‚’ä»˜ã‘ã‚‹
+//ç½®ã‘ãªã„ã¨ã“ã‚ãªã‚‰0
 int cellScore(int x, int y, int z) { 
   //int ans = deepCell[z + turn][x][y];
   for (int i = 1; i < 9; i++) {
@@ -842,23 +842,23 @@ int cellScore(int x, int y, int z) {
 
   Coordinate c ;
   int32 score = 0;
-  //’…è‚µ‚Ä‚İ‚ÄƒXƒRƒA‚ğ•t‚¯‚é
+  //ç€æ‰‹ã—ã¦ã¿ã¦ã‚¹ã‚³ã‚¢ã‚’ä»˜ã‘ã‚‹
   if (deepCell[z + turn][x][y] == 0) {
     
-    deepCell[z + turn][x][y] = (turn + 1) % 2 + 1; //1‚È‚ç•A2‚È‚ç”’
-    c.x = x; //’u‚¢‚½êŠ‚ğ‹L˜^
+    deepCell[z + turn][x][y] = (turn + 1) % 2 + 1; //1ãªã‚‰é»’ã€2ãªã‚‰ç™½
+    c.x = x; //ç½®ã„ãŸå ´æ‰€ã‚’è¨˜éŒ²
     c.y = y;
     c.turn = turn + z;
-    c.status = deepCell[z + turn][x][y]; //F‚ğ‹L˜^
-    //put = true; //’Tõ‚³‚¹‚é
+    c.status = deepCell[z + turn][x][y]; //è‰²ã‚’è¨˜éŒ²
+    //put = true; //æ¢ç´¢ã•ã›ã‚‹
 
     for (int k = 0; k < 8; k++) {
-      int ans = flip_stone(k, c, z); //‚Ğ‚Á‚­‚è•Ô‚·
+      int ans = flip_stone(k, c, z); //ã²ã£ãã‚Šè¿”ã™
     }
     score = staticScore(z);
   }
   
-  //ƒXƒRƒAŒvZ‚µ‚½‚ç‚à‚Æ‚É–ß‚·
+  //ã‚¹ã‚³ã‚¢è¨ˆç®—ã—ãŸã‚‰ã‚‚ã¨ã«æˆ»ã™
   for (int i = 1; i < 9; i++) {
     for (int j = 1; j < 9; j++) {
       for (int k = 1; k < z + 1; k++) {
